@@ -27,8 +27,9 @@ public class HttpUtil {
 	 * @param url
 	 * @param proxy
 	 * @return
+	 * @throws IOException 
 	 */
-	public static String get(String url,String proxyHost,String proxyPort) {  
+	public static String get(String url,String proxyHost,String proxyPort) throws IOException {  
 	    //创建HttpClientBuilder  
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  
 		//HttpClient  
@@ -83,8 +84,6 @@ public class HttpUtil {
 	    			html = new String(bytes,0,offset,charSet);
 	    		return html;
 		    }
-		} catch (IOException e) {  
-		    e.printStackTrace();  
 		} finally {  
 		    try {  
 		    //关闭流并释放资源
@@ -96,7 +95,6 @@ public class HttpUtil {
 	            e.printStackTrace();  
 	        }  
 	    }
-		return null;  
 	}
 
 	/**
@@ -106,7 +104,7 @@ public class HttpUtil {
 	 * @param proxy
 	 * @return
 	 */
-	public static String post(String url,List<BasicNameValuePair> payload,String proxyHost,String proxyPort) {
+	public static String post(String url,List<BasicNameValuePair> payload,String proxyHost,String proxyPort) throws IOException{
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  
 		CloseableHttpClient closeableHttpClient = httpClientBuilder.build();  
@@ -161,8 +159,6 @@ public class HttpUtil {
 	    			html = new String(bytes,0,offset,charSet);
 	    		return html;
 		    }
-		}catch (IOException e) {
-			e.printStackTrace();
 		}finally{
 				try {
 					if(entity!=null)
@@ -174,7 +170,6 @@ public class HttpUtil {
 				}
 		}
 		    
-		return null;
 	}
     /** 
      * 正则获取字符编码 
