@@ -22,6 +22,12 @@ import org.apache.http.util.EntityUtils;
 
 
 public class HttpUtil {
+	
+	public static void main(String[] args) throws IOException {
+		String html = HttpUtil.get("http://www.ip181.com/", null, null);
+		System.out.println(html);
+	}
+	
 	/**
 	 * get请求获取页面 出现异常返回null
 	 * @param url
@@ -37,6 +43,14 @@ public class HttpUtil {
 		
 		HttpGet httpGet = new HttpGet(url);  
 		RequestConfig requestConfig = null;
+		
+		//设置请求头
+        httpGet.setHeader("Accept", "Accept text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");  
+        httpGet.setHeader("Accept-Charset", "GB2312,utf-8;q=0.7,*;q=0.7");  
+        httpGet.setHeader("Accept-Encoding", "gzip, deflate");  
+        httpGet.setHeader("Accept-Language", "zh-cn,zh;q=0.5");  
+        httpGet.setHeader("Connection", "keep-alive");  
+        httpGet.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2");  
 		
 		
 		
@@ -111,6 +125,18 @@ public class HttpUtil {
 		HttpResponse response = null;   
 		HttpPost httpPost = new HttpPost(url);  
 		
+		
+		//设置请求头
+        httpPost.setHeader("Accept", "Accept text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");  
+        httpPost.setHeader("Accept-Charset", "GB2312,utf-8;q=0.7,*;q=0.7");  
+        httpPost.setHeader("Accept-Encoding", "gzip, deflate");  
+        httpPost.setHeader("Accept-Language", "zh-cn,zh;q=0.5");  
+        httpPost.setHeader("Connection", "keep-alive");  
+        httpPost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2");  
+		
+		
+		
+		
 		RequestConfig requestConfig = null;
         if(proxyHost != null && proxyPort != null)
         {
@@ -177,7 +203,7 @@ public class HttpUtil {
      * @return 
      */  
     private static String getCharSet(String content){  
-        String regex = "charset=\\\"*(.+?)[ \\\">]";  
+        String regex = "charset=['\\\"]*(.+?)[ '\\\">]";  
         Pattern pattern = Pattern.compile(regex);  
         Matcher matcher = pattern.matcher(content);  
         if(matcher.find())  
