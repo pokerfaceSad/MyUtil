@@ -2,10 +2,17 @@ package pokerface.Sad.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -15,17 +22,23 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 
 public class HttpUtil {
 	
 	public static void main(String[] args) throws IOException {
-		String html = HttpUtil.get("http://www.ip181.com/", null, null);
+		String html = HttpUtil.get("https://www.zhihu.com/", null, null);
 		System.out.println(html);
+		
 	}
 	
 	/**
@@ -36,10 +49,18 @@ public class HttpUtil {
 	 * @throws IOException 
 	 */
 	public static String get(String url,String proxyHost,String proxyPort) throws IOException {  
-	    //创建HttpClientBuilder  
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  
-		//HttpClient  
-		CloseableHttpClient closeableHttpClient = httpClientBuilder.build();  
+		CloseableHttpClient closeableHttpClient = null;
+		//根据协议类型创建相应client
+		if(isHttps(url))
+			closeableHttpClient = createSSLClientDefault();
+			
+		else {
+			//创建HttpClientBuilder  
+			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create(); 
+			httpClientBuilder.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(5000).build());
+			//HttpClient  
+			closeableHttpClient = httpClientBuilder.build();  
+		}
 		
 		HttpGet httpGet = new HttpGet(url);  
 		RequestConfig requestConfig = null;
@@ -64,8 +85,8 @@ public class HttpUtil {
         			.setSocketTimeout(5000).setProxy(proxy).build();
         }else{
         	requestConfig = RequestConfig.custom()  
-        			.setConnectionRequestTimeout(1000).setConnectTimeout(1000)  
-        			.setSocketTimeout(1000).build();
+        			.setConnectionRequestTimeout(2000).setConnectTimeout(2000)  
+        			.setSocketTimeout(2000).build();
         }
         httpGet.setConfig(requestConfig);    
 		
@@ -100,11 +121,13 @@ public class HttpUtil {
 		    }
 		} finally {  
 		    try {  
-		    //关闭流并释放资源
+		    	//关闭流并释放资源
 		    	if(entity!=null)
 		    		EntityUtils.consume(entity);
+		    	if(httpGet != null)
+		    		httpGet.releaseConnection();
 	            if(closeableHttpClient!= null)
-	            	closeableHttpClient.close();  
+	            	closeableHttpClient.close();
 	        } catch (IOException e) {  
 	            e.printStackTrace();  
 	        }  
@@ -120,8 +143,18 @@ public class HttpUtil {
 	 */
 	public static String post(String url,List<BasicNameValuePair> payload,String proxyHost,String proxyPort) throws IOException{
 
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  
-		CloseableHttpClient closeableHttpClient = httpClientBuilder.build();  
+		CloseableHttpClient closeableHttpClient = null;
+		//根据协议类型创建相应client
+		if(isHttps(url))
+			closeableHttpClient = createSSLClientDefault();
+		else {
+			//创建HttpClientBuilder  
+			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  
+			httpClientBuilder.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(5000).build());
+			//HttpClient  
+			closeableHttpClient = httpClientBuilder.build();  
+		}
+		
 		HttpResponse response = null;   
 		HttpPost httpPost = new HttpPost(url);  
 		
@@ -197,6 +230,32 @@ public class HttpUtil {
 		}
 		    
 	}
+	/**
+	 * 返回一个SSL连接的CloseableHttpClient实例
+	 * @return
+	 */
+    public static CloseableHttpClient createSSLClientDefault(){
+        try {
+            SSLContext sslContext=new SSLContextBuilder().loadTrustMaterial(
+                    null,new TrustStrategy() {
+                        //信任所有
+                        public boolean isTrusted(X509Certificate[] chain, String authType)
+                                throws CertificateException {
+                            return true;
+                        }
+                    }).build();
+            SSLConnectionSocketFactory sslsf=new SSLConnectionSocketFactory(sslContext);
+            
+            return HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(5000).build()).build();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        return HttpClients.createDefault();
+    }
     /** 
      * 正则获取字符编码 
      * @param content 
@@ -211,5 +270,20 @@ public class HttpUtil {
         else  
             return null;  
     }  
+    
+    /**
+     * 判断请求URL是否为https请求
+     * @param url
+     * @return
+     */
+    public static boolean isHttps(String url){
+		boolean result =  false;
+    	
+		Pattern p = Pattern.compile("https://");
+		Matcher m = p.matcher(url);
+		if(m.find()) result = true;
+		
+    	return result;
+    }
 }
 

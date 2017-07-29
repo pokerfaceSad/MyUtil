@@ -36,9 +36,8 @@ public class DBUtil {
 	 * @throws SQLException
 	 */
 	public static Connection getConn() throws FileNotFoundException, IOException, SQLException  {
-		Properties pro = new Properties();
 		Connection conn = null;
-		pro = getProperties();
+		Properties pro = getProperties();
 		conn = DriverManager.getConnection(pro.getProperty("url"),pro.getProperty("user"),pro.getProperty("password"));
 		return conn;
 	}
