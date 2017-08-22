@@ -110,7 +110,7 @@ public class DBUtil {
 		if(rs!=null)
 		{
 			try {
-				ps.close();
+				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

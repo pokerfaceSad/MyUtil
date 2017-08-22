@@ -8,9 +8,9 @@ public class CharSetUtil {
 	
 	public static void main(String[] args) {
 		
-		String unicodeStr = "\\u7a0b\\u9ad8\\u5cf0";
+		String unicodeStr = "\\u817e\\u8baf";
 		System.out.println(unicode2String(unicodeStr));
-		System.out.println(string2Unicode("程高峰"));
+		System.out.println("\u6e38\u620f\u4ea7\u54c1\u7ecf\u7406");
 	}
 	
 	/**
