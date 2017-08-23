@@ -26,7 +26,7 @@ public class DBUtil {
 	}
 	
 	//properties 对象的单例
-	private static Properties properties = null;
+	private static Properties dbProperties = null;
 	/**
 	 * 
 	 * 获取数据库连接
@@ -37,26 +37,23 @@ public class DBUtil {
 	 */
 	public static Connection getConn() throws FileNotFoundException, IOException, SQLException  {
 		Connection conn = null;
-		Properties pro = getProperties();
+		Properties pro = getDBProperties();
 		conn = DriverManager.getConnection(pro.getProperty("url"),pro.getProperty("user"),pro.getProperty("password"));
 		return conn;
 	}
 	/**
-	 * 获取根目录下的配置文件
+	 * 获取根目录下的数据库配置文件
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static Properties getProperties() throws FileNotFoundException, IOException{
-		
-		
-		if(properties == null)
+	public static Properties getDBProperties() throws FileNotFoundException, IOException{
+		if(dbProperties == null)
 		{
-			properties = new Properties();
-			properties.load(new FileInputStream("db.properties"));
-			return properties;
+			dbProperties = FileUtil.getProperties("db.properties");
+			return dbProperties;
 		}else
-			return properties;
+			return dbProperties;
 			
 	}
 	
